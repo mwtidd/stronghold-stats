@@ -263,9 +263,9 @@ Example:
     },
 
     sortByScore: function(team1, team2){
-      if(this.getScore(team1)/team1.matchCount > this.getScore(team2)/team2.matchCount){
+      if(this.getScore(team1) > this.getScore(team2)){
         return -1;
-      }else if(this.getScore(team1)/team1.matchCount < this.getScore(team2)/team2.matchCount){
+      }else if(this.getScore(team1) < this.getScore(team2)){
         return 1;
       }else{
         return 0;
@@ -311,7 +311,7 @@ Example:
     },
 
     getScore: function(team){
-      return this.round(team.autoBouldersLow * 5 + team.autoBouldersHigh * 10 + team.teleopBouldersLow * 2 + team.teleopBouldersHigh * 5);
+      return this.round((team.autoBouldersLow * 5 + team.autoBouldersHigh * 10 + team.teleopBouldersLow * 2 + team.teleopBouldersHigh * 5)/team.matchCount);
     },
 
     onError: function(event){
