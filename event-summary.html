@@ -61,6 +61,7 @@ Example:
         <paper-button hidden on-tap="goToDetails">Details</paper-button>
         <paper-button on-tap="goToMatches">Matches</paper-button>
         <paper-button on-tap="goToRanking">Rankings</paper-button>
+        <paper-button on-tap="goToContributions">Contributions</paper-button>
       </div>
     </paper-card>
     <content></content>
@@ -123,6 +124,10 @@ Example:
 
     goToRanking: function(){
       this.fire("route-change",{"path":"eventRanking","code":this.event.code});
+    },
+
+    goToContributions: function(){
+      this.fire("route-change",{"path":"teamContributions","code":this.event.code});
     },
 
     onError: function(event){

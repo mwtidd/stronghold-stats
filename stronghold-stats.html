@@ -18,6 +18,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../stronghold-stats/event-details.html">
 <link rel="import" href="../stronghold-stats/event-match-list.html">
 <link rel="import" href="../stronghold-stats/event-ranking-list.html">
+<link rel="import" href="../stronghold-stats/team-contribution-list.html">
 
 
 <link rel="import" href="../paper-drawer-panel/paper-drawer-panel.html">
@@ -129,6 +130,7 @@ Example:
           <paper-item on-tap="goToEvents" paper-drawer-toggle>Event List</paper-item>
           <paper-item on-tap="goToMatches" paper-drawer-toggle>{{getEventCode(tail.path)}} Match List</paper-item>
           <paper-item on-tap="goToRanking" paper-drawer-toggle>{{getEventCode(tail.path)}} Ranking List</paper-item>
+          <paper-item on-tap="goToContributions" paper-drawer-toggle>{{getEventCode(tail.path)}} Contribution List</paper-item>
         </div>
       </paper-header-panel>
       <paper-header-panel main>
@@ -141,6 +143,7 @@ Example:
           <event-list id="events" event-code-path="{{tail.path}}"></event-list>
           <event-match-list id="eventMatches" event-code-path="{{tail.path}}" event-code="{{getEventCode(tail.path)}}"></event-match-list>
           <event-ranking-list id="eventRanking" event-code-path="{{tail.path}}" event-code="{{getEventCode(tail.path)}}"></event-ranking-list>
+          <team-contribution-list id="teamContributions" event-code-path="{{tail.path}}" event-code="{{getEventCode(tail.path)}}"></team-contribution-list>
         </iron-pages>
       </paper-header-panel>
     </paper-drawer-panel>
@@ -246,6 +249,10 @@ Example:
 
     goToRanking: function(){
       this.changeRoute({"path":"eventRanking","code":this.getEventCode(this.tail.path)});
+    },
+
+    goToContributions: function(){
+      this.changeRoute({"path":"teamContributions","code":this.getEventCode(this.tail.path)});
     },
 
 
