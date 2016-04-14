@@ -153,7 +153,8 @@ Example:
         <paper-card>
           <div class="card-content">
             <div class="row">
-              <div></div>
+              <div class="label"></div>
+              <div class="team"></div>
               <div class="value">Auto Low</div>
               <div class="value">Auto High</div>
               <div class="value">Teleop Low</div>
@@ -167,6 +168,7 @@ Example:
           <paper-card>
             <div class="card-content">
               <div class="row">
+                <div class="label">{{getRank(index)}}</div>
                 <div class="team">[[team.teamNumber]]</div>
                 <div class="value">[[avg(team.autoBouldersLow, team.matchCount)]]</div>
                 <div class="value">[[avg(team.autoBouldersHigh, team.matchCount)]]</div>
