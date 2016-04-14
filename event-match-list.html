@@ -1,0 +1,277 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../polymer/polymer.html">
+
+<link rel="import" href="../iron-ajax/iron-ajax.html">
+
+<link rel="import" href="../paper-card/paper-card.html">
+<link rel="import" href="../paper-spinner/paper-spinner.html">
+
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-tabs/paper-tabs.html">
+<link rel="import" href="../paper-tabs/paper-tab.html">
+
+<link rel="import" href="../iron-pages/iron-pages.html">
+
+<link rel="import" href="event-match-item.html"/>
+
+<!--
+An element to start from.
+
+Example:
+
+    <event-match-list></event-match-list>
+
+@demo
+-->
+<dom-module id="event-match-list">
+
+  <style>
+    :host {
+      display: block;
+      @apply(--layout-vertical);
+
+      --paper-card-header-text:{
+        font-size: 20px;
+        font-weight: 500;
+      };
+    }
+
+    :host paper-card{
+      @apply(--layout-flex);
+      @apply(--layout-vertical);
+      margin: 16px;
+      height: 100%;
+      transition: height 500ms;
+    }
+
+    :host paper-card .card-content{
+      @apply(--layout-flex);
+    }
+
+    :host paper-card .card-content .row{
+      @apply(--layout-horizontal);
+    }
+
+    :host paper-card .card-content .row > div{
+      @apply(--layout-flex);
+    }
+
+    :host paper-card .card-content .column{
+      @apply(--layout-vertical);
+    }
+
+    :host paper-card .card-content paper-material{
+      @apply(--layout-horizontal);
+      @apply(--layout-flex-3);
+      padding: 8px;
+      margin: 8px;
+    }
+
+    :host paper-card .card-content paper-material.score{
+      @apply(--layout-flex);
+    }
+
+    :host paper-card .card-content paper-material.red{
+      background-color: var(--google-red-500);
+    }
+
+    :host paper-card .card-content paper-material.blue{
+      background-color: var(--google-blue-500);
+    }
+
+    :host paper-card .card-content paper-material > div{
+      @apply(--layout-flex);
+    }
+    :host paper-card .card-content paper-material h4{
+      margin: 0px;
+    }
+
+    :host paper-card .card-content paper-material .row > div.position{
+      @apply(--layout-flex);
+      text-align: left;
+    }
+
+    :host paper-card .card-content paper-material .row > div.defense{
+      @apply(--layout-flex-2);
+      text-align: left;
+    }
+
+    :host paper-card .card-content paper-material .row > div.crossings{
+      @apply(--layout-flex);
+      text-align: right;
+    }
+
+    :host paper-card .card-content paper-material .row > div.label{
+       @apply(--layout-flex);
+       text-align: left;
+     }
+
+    :host paper-card .card-content paper-material .row > div.value{
+      @apply(--layout-flex);
+      text-align: center;
+    }
+
+    :host paper-card .card-content paper-material.red > div,
+    :host paper-card .card-content paper-material.blue > div{
+      color: white;
+      text-align: center;
+    }
+
+    :host .start-time{
+      position: absolute;
+      top: -8px;
+      right: 8px;
+    }
+
+    :host paper-card .card-content .card-heading{
+      @apply(--layout-horizontal);
+    }
+
+    :host paper-card .card-content .card-heading h3{
+      display: inline;
+      margin: 0;
+      @apply(--layout-flex);
+    }
+
+    :host paper-spinner{
+      margin: 16px;
+    }
+  </style>
+
+  <template>
+    <iron-ajax auto id="ajax" url$="https://stronghold-stats.appspot.com/events/details?eventCode={{getEventCode(eventCodePath)}}" handle-as="json" on-error="onError" last-response="{{event}}"></iron-ajax>
+    <paper-material id="eventMatchList">
+      <paper-spinner active$="{{isLoading(event)}}" hidden$="{{!isLoading(event)}}"></paper-spinner>
+      <paper-listbox selected="{{selectedEventCode}}" attr-for-selected="value">
+        <template is="dom-repeat" items="{{event.matches}}" as="match">
+          <event-match-item match="{{match}}"></event-match-item>
+        </template>
+      </paper-listbox>
+    </paper-material>
+    <content></content>
+  </template>
+
+</dom-module>
+
+<script>
+
+  Polymer({
+
+    is: 'event-match-list',
+
+    properties: {
+
+      event: {
+        type: Object,
+        value: null,
+        notify: true
+      },
+
+      eventCode: {
+        type: String,
+        value: null
+      },
+
+      eventCodePath: {
+        type: String,
+        value: null
+      }
+
+    },
+
+    // Element Lifecycle
+
+    ready: function() {
+      // `ready` is called after all elements have been configured, but
+      // propagates bottom-up. This element's children are ready, but parents
+      // are not.
+      //
+      // This is the point where you should make modifications to the DOM (when
+      // necessary), or kick off any processes the element wants to perform.
+      if(!this.eventCodePath){
+        this.fire("route-change",{"path":"events"});
+      }
+    },
+
+    attached: function() {
+      // `attached` fires once the element and its parents have been inserted
+      // into a document.
+      //
+      // This is a good place to perform any work related to your element's
+      // visual state or active behavior (measuring sizes, beginning animations,
+      // loading resources, etc).
+    },
+
+    detached: function() {
+      // The analog to `attached`, `detached` fires when the element has been
+      // removed from a document.
+      //
+      // Use this to clean up anything you did in `attached`.
+    },
+
+    // Element Behavior
+
+    getEventCode: function(eventCodePath){
+      if(eventCodePath){
+        return eventCodePath.split("/")[1];
+      }
+      return "";
+    },
+
+    isLoading: function(event){
+      if(event){
+        return false;
+      }else{
+        return true;
+      }
+    },
+
+    formatStartTime: function(startTime){
+      return startTime.replace(":00 ", " ").replace(", 2016", "");
+    },
+
+    formatCount: function(count){
+      if(count == 0){
+        return "--";
+      }else{
+        return count;
+      }
+    },
+
+    formatDefense: function(defense){
+      if(defense.toLowerCase() == "a_portcullis"){
+        return "porcullis";
+      }if(defense.toLowerCase() == "a_chevaldefrise"){
+        return "cheval";
+      }else if(defense.toLowerCase() == "b_ramparts"){
+        return "ramparts";
+      }else if(defense.toLowerCase() == "b_moat"){
+        return "moat";
+      }else if(defense.toLowerCase() == "c_drawbridge"){
+        return "drawbridge";
+      }else if(defense.toLowerCase() == "c_sallyport"){
+        return "sally port";
+      }else if(defense.toLowerCase() == "d_roughterrain"){
+        return "terrain";
+      }else if(defense.toLowerCase() == "d_rockwall"){
+        return "rock wall";
+      }else{
+        return "unknown";
+      }
+    },
+
+    onError: function(event){
+      this;
+    }
+
+  });
+
+</script>

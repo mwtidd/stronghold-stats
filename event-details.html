@@ -1,0 +1,147 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../polymer/polymer.html">
+
+<link rel="import" href="../iron-ajax/iron-ajax.html">
+
+<link rel="import" href="../paper-card/paper-card.html">
+
+<link rel="import" href="../paper-button/paper-button.html">
+
+<!--
+An element to start from.
+
+Example:
+
+    <event-details></event-details>
+
+@demo
+-->
+<dom-module id="event-details">
+
+  <style>
+    :host {
+      display: block;
+      @apply(--layout-vertical);
+
+      --paper-card-header-text:{
+        font-size: 20px;
+        font-weight: 500;
+      };
+    }
+
+    :host paper-card{
+      @apply(--layout-flex);
+      @apply(--layout-vertical);
+      margin: 16px;
+      height: 100%;
+      transition: height 500ms;
+    }
+
+    :host paper-card .card-content{
+      @apply(--layout-flex);
+    }
+  </style>
+
+  <template>
+    <iron-ajax auto id="ajax" url$="https://stronghold-stats.appspot.com/events/details?eventCode={{getEventCode(eventCodePath)}}" handle-as="json" on-error="onError" last-response="{{event}}"></iron-ajax>
+    <paper-card heading="{{event.name}}">
+      <div class="card-content">
+
+      </div>
+      <div class="card-actions">
+        <paper-button on-tap="goToMatches">Matches</paper-button>
+        <paper-button on-tap="goToRanking">Rankings</paper-button>
+        <paper-button>Teams</paper-button>
+      </div>
+    </paper-card>
+    <content></content>
+  </template>
+
+</dom-module>
+
+<script>
+
+  Polymer({
+
+    is: 'event-details',
+
+    properties: {
+
+      event: {
+        type: Object,
+        values: null,
+        notify: true
+      },
+
+      eventCode: {
+        type: String,
+        value: null
+      },
+
+      eventCodePath: {
+        type: String,
+        value: null
+      }
+
+    },
+
+    // Element Lifecycle
+
+    ready: function() {
+      // `ready` is called after all elements have been configured, but
+      // propagates bottom-up. This element's children are ready, but parents
+      // are not.
+      //
+      // This is the point where you should make modifications to the DOM (when
+      // necessary), or kick off any processes the element wants to perform.
+
+    },
+
+    attached: function() {
+      // `attached` fires once the element and its parents have been inserted
+      // into a document.
+      //
+      // This is a good place to perform any work related to your element's
+      // visual state or active behavior (measuring sizes, beginning animations,
+      // loading resources, etc).
+    },
+
+    detached: function() {
+      // The analog to `attached`, `detached` fires when the element has been
+      // removed from a document.
+      //
+      // Use this to clean up anything you did in `attached`.
+    },
+
+    // Element Behavior
+
+    getEventCode: function(eventCodePath){
+      if(eventCodePath){
+        return eventCodePath.split("/")[1];
+      }
+      return "";
+    },
+
+    goToMatches: function(){
+      this.fire("route-change",{"path":"eventMatches","code":this.eventCodePath.split("/")[1]});
+    },
+
+    goToRanking: function(){
+      this.fire("route-change",{"path":"eventRanking","code":this.eventCodePath.split("/")[1]});
+    },
+
+    onError: function(event){
+      this;
+    }
+
+  });
+
+</script>
