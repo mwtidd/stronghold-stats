@@ -155,11 +155,14 @@ Example:
             <div class="row">
               <div class="label"></div>
               <div class="team"></div>
+              <div class="value">Auto Crossing</div>
               <div class="value">Auto Low</div>
               <div class="value">Auto High</div>
               <div class="value">Teleop Low</div>
               <div class="value">Teleop High</div>
-              <div class="value">Boulder Score</div>
+              <div class="value">Challenge</div>
+              <div class="value">Scale</div>
+              <div class="value">Score</div>
               <div class="value">Match Count</div>
             </div>
           </div>
@@ -170,10 +173,13 @@ Example:
               <div class="row">
                 <div class="label">{{getRank(index)}}</div>
                 <div class="team">[[team.teamNumber]]</div>
+                <div class="value">[[avg(team.autoCrossingPoints, team.matchCount)]]</div>
                 <div class="value">[[avg(team.autoBouldersLow, team.matchCount)]]</div>
                 <div class="value">[[avg(team.autoBouldersHigh, team.matchCount)]]</div>
                 <div class="value">[[avg(team.teleopBouldersLow, team.matchCount)]]</div>
                 <div class="value">[[avg(team.teleopBouldersHigh, team.matchCount)]]</div>
+                <div class="value">[[avg(team.challengePoints, team.matchCount)]]</div>
+                <div class="value">[[avg(team.scalePoints, team.matchCount)]]</div>
                 <div class="value">[[getScore(team)]]</div>
                 <div class="value">[[round(team.matchCount)]]</div>
               </div>
@@ -313,7 +319,7 @@ Example:
     },
 
     getScore: function(team){
-      return this.round((team.autoBouldersLow * 5 + team.autoBouldersHigh * 10 + team.teleopBouldersLow * 2 + team.teleopBouldersHigh * 5)/team.matchCount);
+      return this.round((team.autoCrossingPoints + team.autoBouldersLow * 5 + team.autoBouldersHigh * 10 + team.teleopBouldersLow * 2 + team.teleopBouldersHigh * 5 + (team.challengePoints + team.scalePoints)/2)/team.matchCount);
     },
 
     onError: function(event){
