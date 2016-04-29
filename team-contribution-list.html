@@ -319,7 +319,10 @@ Example:
     },
 
     getScore: function(team){
-      return this.round((team.autoCrossingPoints/team.matchCount + (team.autoBouldersLow * 5)/team.matchCount + (team.autoBouldersHigh * 10)/team.matchCount + (team.teleopBouldersLow * 2)/team.matchCount + (team.teleopBouldersHigh * 5)/team.matchCount + (team.challengePoints + team.scalePoints)/2)/team.matchCount);
+      var score = team.autoCrossingPoints + team.autoBouldersLow * 5 + team.autoBouldersHigh * 10 + team.teleopBouldersLow * 2 + team.teleopBouldersHigh * 5;
+      score += (team.challengePoints + team.scalePoints)/2;
+      var avgScore = score / team.matchCount;
+      return this.round(avgScore);
     },
 
     onError: function(event){
