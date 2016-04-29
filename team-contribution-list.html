@@ -143,6 +143,14 @@ Example:
     :host paper-spinner{
       margin: 16px;
     }
+
+    :host #headers{
+      position: fixed;
+      z-index: 1;
+      height: 67px;
+      top: 51px;
+      width: calc(100% - 42px);
+    }
   </style>
 
   <template>
@@ -150,7 +158,7 @@ Example:
     <paper-material id="eventMatchList">
       <paper-spinner active$="{{isLoading(event)}}" hidden$="{{!isLoading(event)}}"></paper-spinner>
       <paper-listbox selected="{{selectedEventCode}}" attr-for-selected="value">
-        <paper-card>
+        <paper-card id="headers">
           <div class="card-content">
             <div class="row">
               <div class="label"></div>

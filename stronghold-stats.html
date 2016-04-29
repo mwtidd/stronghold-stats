@@ -117,6 +117,13 @@ Example:
     :host paper-tabs{
       @apply(--layout-flex);
     }
+
+    :host ::content #drawer{
+      z-index: 2;
+    }
+    :host ::content #scrim{
+      z-index: 1;
+    }
   </style>
 
   <template>
