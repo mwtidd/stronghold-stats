@@ -1,0 +1,346 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../polymer/polymer.html">
+
+<link rel="import" href="../iron-ajax/iron-ajax.html">
+
+<link rel="import" href="../paper-card/paper-card.html">
+<link rel="import" href="../paper-spinner/paper-spinner.html">
+
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-tabs/paper-tabs.html">
+<link rel="import" href="../paper-tabs/paper-tab.html">
+
+<link rel="import" href="../iron-pages/iron-pages.html">
+
+<link rel="import" href="event-match-item.html"/>
+
+<!--
+An element to start from.
+
+Example:
+
+    <team-contribution-list></team-contribution-list>
+
+@demo
+-->
+<dom-module id="team-contribution-list">
+
+  <style>
+    :host {
+      display: block;
+      @apply(--layout-vertical);
+
+      --paper-card-header-text:{
+        font-size: 20px;
+        font-weight: 500;
+      };
+    }
+
+    :host paper-card{
+      @apply(--layout-flex);
+      @apply(--layout-vertical);
+      margin: 16px;
+      height: 100%;
+      transition: height 500ms;
+    }
+
+    :host paper-card .card-content{
+      @apply(--layout-flex);
+    }
+
+    :host paper-card .card-content .row{
+      @apply(--layout-horizontal);
+    }
+
+    :host paper-card .card-content .row > div{
+      @apply(--layout-flex);
+    }
+
+    :host paper-card .card-content .column{
+      @apply(--layout-vertical);
+    }
+
+    :host paper-card .card-content{
+      @apply(--layout-horizontal);
+      @apply(--layout-flex-3);
+      padding: 8px;
+      margin: 8px;
+    }
+
+    :host paper-card .card-content.score{
+      @apply(--layout-flex);
+    }
+
+    :host paper-card .card-content.red{
+      background-color: var(--google-red-500);
+    }
+
+    :host paper-card .card-content.blue{
+      background-color: var(--google-blue-500);
+    }
+
+    :host paper-card .card-content > div{
+      @apply(--layout-flex);
+    }
+    :host paper-card .card-content h4{
+      margin: 0px;
+    }
+
+    :host paper-card .card-content .row > div.position{
+      @apply(--layout-flex);
+      text-align: left;
+    }
+
+    :host paper-card .card-content .row > div.defense{
+      @apply(--layout-flex-2);
+      text-align: left;
+    }
+
+    :host paper-card .card-content .row > div.crossings{
+      @apply(--layout-flex);
+      text-align: right;
+    }
+
+    :host paper-card .card-content .row > div.label{
+       @apply(--layout-flex);
+       text-align: left;
+     }
+
+    :host paper-card .card-content .row > div.value{
+      text-align: right;
+    }
+
+    :host paper-card .card-content.red > div,
+    :host paper-card .card-content.blue > div{
+      color: white;
+      text-align: center;
+    }
+
+    :host .start-time{
+      position: absolute;
+      top: -8px;
+      right: 8px;
+    }
+
+    :host paper-card .card-content .card-heading{
+      @apply(--layout-horizontal);
+    }
+
+    :host paper-card .card-content .card-heading h3{
+      display: inline;
+      margin: 0;
+      @apply(--layout-flex);
+    }
+
+    :host paper-spinner{
+      margin: 16px;
+    }
+
+    :host #headers{
+      position: fixed;
+      z-index: 1;
+      height: 67px;
+      top: 51px;
+      width: calc(100% - 42px);
+    }
+  </style>
+
+  <template>
+    <iron-ajax auto id="ajax" url$="https://stronghold-stats.appspot.com/event/team/stats?eventCode={{getEventCode(eventCodePath)}}" handle-as="json" on-error="onError" last-response="{{teams}}"></iron-ajax>
+    <paper-material id="eventMatchList">
+      <paper-spinner active$="{{isLoading(event)}}" hidden$="{{!isLoading(event)}}"></paper-spinner>
+      <paper-listbox selected="{{selectedEventCode}}" attr-for-selected="value">
+        <paper-card id="headers">
+          <div class="card-content">
+            <div class="row">
+              <div class="label"></div>
+              <div class="team"></div>
+              <div class="value">Auto Crossing</div>
+              <div class="value">Auto Low</div>
+              <div class="value">Auto High</div>
+              <div class="value">Teleop Low</div>
+              <div class="value">Teleop High</div>
+              <div class="value">Challenge</div>
+              <div class="value">Scale</div>
+              <div class="value">Score</div>
+              <div class="value">Match Count</div>
+            </div>
+          </div>
+        </paper-card>
+        <template is="dom-repeat" items="{{teams}}" as="team" sort="sortByScore">
+          <paper-card>
+            <div class="card-content">
+              <div class="row">
+                <div class="label">{{getRank(index)}}</div>
+                <div class="team">[[team.teamNumber]]</div>
+                <div class="value">[[avg(team.autoCrossingPoints, team.matchCount)]]</div>
+                <div class="value">[[avg(team.autoBouldersLow, team.matchCount)]]</div>
+                <div class="value">[[avg(team.autoBouldersHigh, team.matchCount)]]</div>
+                <div class="value">[[avg(team.teleopBouldersLow, team.matchCount)]]</div>
+                <div class="value">[[avg(team.teleopBouldersHigh, team.matchCount)]]</div>
+                <div class="value">[[avg(team.challengePoints, team.matchCount)]]</div>
+                <div class="value">[[avg(team.scalePoints, team.matchCount)]]</div>
+                <div class="value">[[getScore(team)]]</div>
+                <div class="value">[[round(team.matchCount)]]</div>
+              </div>
+            </div>
+          </paper-card>
+        </template>
+      </paper-listbox>
+    </paper-material>
+    <content></content>
+  </template>
+
+</dom-module>
+
+<script>
+
+  Polymer({
+
+    is: 'team-contribution-list',
+
+    properties: {
+
+      teams: {
+        type: Array,
+        value: null,
+        notify: true
+      },
+
+      eventCode: {
+        type: String,
+        value: null
+      },
+
+      eventCodePath: {
+        type: String,
+        value: null
+      }
+
+    },
+
+    // Element Lifecycle
+
+    ready: function() {
+      // `ready` is called after all elements have been configured, but
+      // propagates bottom-up. This element's children are ready, but parents
+      // are not.
+      //
+      // This is the point where you should make modifications to the DOM (when
+      // necessary), or kick off any processes the element wants to perform.
+      if(!this.eventCodePath){
+        this.fire("route-change",{"path":"events"});
+      }
+    },
+
+    attached: function() {
+      // `attached` fires once the element and its parents have been inserted
+      // into a document.
+      //
+      // This is a good place to perform any work related to your element's
+      // visual state or active behavior (measuring sizes, beginning animations,
+      // loading resources, etc).
+    },
+
+    detached: function() {
+      // The analog to `attached`, `detached` fires when the element has been
+      // removed from a document.
+      //
+      // Use this to clean up anything you did in `attached`.
+    },
+
+    // Element Behavior
+
+    getEventCode: function(eventCodePath){
+      if(eventCodePath){
+        return eventCodePath.split("/")[1];
+      }
+      return "";
+    },
+
+    isLoading: function(event){
+      if(event){
+        return false;
+      }else{
+        return true;
+      }
+    },
+
+    avg: function(number, count){
+      return this.round(number/count);
+    },
+
+    sortByScore: function(team1, team2){
+      if(this.getScore(team1) > this.getScore(team2)){
+        return -1;
+      }else if(this.getScore(team1) < this.getScore(team2)){
+        return 1;
+      }else{
+        return 0;
+      }
+    },
+
+    formatStartTime: function(startTime){
+      return startTime.replace(":00 ", " ").replace(", 2016", "");
+    },
+
+    formatCount: function(count){
+      if(count == 0){
+        return "--";
+      }else{
+        return count;
+      }
+    },
+
+    formatDefense: function(defense){
+      if(defense.toLowerCase() == "a_portcullis"){
+        return "porcullis";
+      }if(defense.toLowerCase() == "a_chevaldefrise"){
+        return "cheval";
+      }else if(defense.toLowerCase() == "b_ramparts"){
+        return "ramparts";
+      }else if(defense.toLowerCase() == "b_moat"){
+        return "moat";
+      }else if(defense.toLowerCase() == "c_drawbridge"){
+        return "drawbridge";
+      }else if(defense.toLowerCase() == "c_sallyport"){
+        return "sally port";
+      }else if(defense.toLowerCase() == "d_roughterrain"){
+        return "terrain";
+      }else if(defense.toLowerCase() == "d_rockwall"){
+        return "rock wall";
+      }else{
+        return "unknown";
+      }
+    },
+
+    getRank: function(index){
+      return index + 1;
+    },
+
+    getScore: function(team){
+      var score = team.autoCrossingPoints + team.autoBouldersLow * 5 + team.autoBouldersHigh * 10 + team.teleopBouldersLow * 2 + team.teleopBouldersHigh * 5;
+      score += (team.challengePoints + team.scalePoints)/2;
+      var avgScore = score / team.matchCount;
+      return this.round(avgScore);
+    },
+
+    onError: function(event){
+      this;
+    },
+
+    round: function(number){
+      return Math.round(number * 100)/100;
+    }
+
+  });
+
+</script>

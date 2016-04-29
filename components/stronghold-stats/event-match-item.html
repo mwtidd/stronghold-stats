@@ -1,0 +1,362 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../polymer/polymer.html">
+
+<link rel="import" href="../iron-ajax/iron-ajax.html">
+
+<link rel="import" href="../paper-card/paper-card.html">
+
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-tabs/paper-tabs.html">
+<link rel="import" href="../paper-tabs/paper-tab.html">
+
+<link rel="import" href="../iron-pages/iron-pages.html">
+
+<!--
+An element to start from.
+
+Example:
+
+    <event-match-item></event-match-item>
+
+@demo
+-->
+<dom-module id="event-match-item">
+
+  <style>
+    :host {
+
+    }
+
+    :host paper-card{
+      @apply(--layout-flex);
+      @apply(--layout-vertical);
+      margin: 16px;
+      height: 100%;
+      transition: height 500ms;
+    }
+
+    :host paper-card .card-content{
+      @apply(--layout-flex);
+    }
+
+    :host paper-card .card-content .row{
+      @apply(--layout-horizontal);
+    }
+
+    :host paper-card .card-content .row > div{
+      @apply(--layout-flex);
+    }
+
+    :host paper-card .card-content .column{
+      @apply(--layout-vertical);
+    }
+
+    :host paper-card .card-content paper-material{
+      @apply(--layout-horizontal);
+      @apply(--layout-flex-3);
+      padding: 8px;
+      margin: 8px;
+    }
+
+    :host paper-card .card-content paper-material.score{
+      @apply(--layout-flex);
+    }
+
+    :host paper-card .card-content paper-material.red{
+      background-color: var(--google-red-500);
+    }
+
+    :host paper-card .card-content paper-material.blue{
+      background-color: var(--google-blue-500);
+    }
+
+    :host paper-card .card-content paper-material > div{
+      @apply(--layout-flex);
+    }
+    :host paper-card .card-content paper-material h4{
+      margin: 0px;
+    }
+
+    :host paper-card .card-content paper-material .row > div.position{
+      @apply(--layout-flex);
+      text-align: left;
+    }
+
+    :host paper-card .card-content paper-material .row > div.defense{
+      @apply(--layout-flex-2);
+      text-align: left;
+    }
+
+    :host paper-card .card-content paper-material .row > div.crossings{
+      @apply(--layout-flex);
+      text-align: right;
+    }
+
+    :host paper-card .card-content paper-material .row > div.label{
+       @apply(--layout-flex);
+       text-align: left;
+     }
+
+    :host paper-card .card-content paper-material .row > div.value{
+      @apply(--layout-flex);
+      text-align: center;
+    }
+
+    :host paper-card .card-content paper-material.red > div,
+    :host paper-card .card-content paper-material.blue > div{
+      color: white;
+      text-align: center;
+    }
+
+    :host .start-time{
+      position: absolute;
+      top: -8px;
+      right: 8px;
+    }
+
+    :host paper-card .card-content .card-heading{
+      @apply(--layout-horizontal);
+    }
+
+    :host paper-card .card-content .card-heading h3{
+      display: inline;
+      margin: 0;
+      @apply(--layout-flex);
+    }
+  </style>
+
+  <template>
+   <paper-card>
+            <div class="card-content">
+              <div class="card-heading"><h3>#{{match.matchNumber}}</h3><span>[[formatStartTime(match.startTime)]]</span></div>
+              <div class="row">
+                <paper-material class="red">
+                  <div>[[match.red1]]</div>
+                  <div>[[match.red2]]</div>
+                  <div>[[match.red3]]</div>
+                </paper-material>
+                <paper-material class="red score">
+                  <div>[[match.redMatchScore.totalPoints]]</div>
+                </paper-material>
+              </div>
+
+
+              <div class="row">
+                <paper-material class="blue">
+                  <div>[[match.blue1]]</div>
+                  <div>[[match.blue2]]</div>
+                  <div>[[match.blue3]]</div>
+                </paper-material>
+                <paper-material class="blue score">
+                  <div>[[match.blueMatchScore.totalPoints]]</div>
+                </paper-material>
+              </div>
+
+              <div class="row">
+                <div class="column">
+                  <paper-tabs selected="{{selectedTab}}">
+                    <paper-tab>Red Details</paper-tab>
+                    <paper-tab>Blue Details</paper-tab>
+                  </paper-tabs>
+                  <iron-pages selected="{{selectedTab}}">
+                    <div>
+                      <div class="row">
+                        <paper-material>
+                          <div class="column">
+                            <h4>Red Crossings</h4>
+                            <div class="row">
+                              <div class="position">1</div><div class="defense">low bar</div><div class="crossings">[[match.redMatchScore.position1Crossings]]</div>
+                            </div>
+                            <div class="row">
+                              <div class="position">2</div><div class="defense">[[formatDefense(match.redMatchScore.position2)]]</div><div class="crossings">[[match.redMatchScore.position2Crossings]]</div>
+                            </div>
+                            <div class="row">
+                              <div class="position">3</div><div class="defense">[[formatDefense(match.redMatchScore.position3)]]</div><div class="crossings">[[match.redMatchScore.position3Crossings]]</div>
+                            </div>
+                            <div class="row">
+                              <div class="position">4</div><div class="defense">[[formatDefense(match.redMatchScore.position4)]]</div><div class="crossings">[[match.redMatchScore.position4Crossings]]</div>
+                            </div>
+                            <div class="row">
+                              <div class="position">5</div><div class="defense">[[formatDefense(match.redMatchScore.position5)]]</div><div class="crossings">[[match.redMatchScore.position5Crossings]]</div>
+                            </div>
+                          </div>
+                        </paper-material>
+                      </div>
+                      <div class="row">
+                        <paper-material>
+                          <div class="column">
+                            <h4>Red Boulders</h4>
+                            <div class="row">
+                              <div class="label"></div><div class="value">auto</div><div class="value">teleop</div>
+                            </div>
+                            <div class="row">
+                              <div class="label">low</div><div class="value">[[formatCount(match.redMatchScore.autoBouldersLow)]]</div><div class="value">[[formatCount(match.redMatchScore.teleopBouldersLow)]]</div>
+                            </div>
+                            <div class="row">
+                              <div class="label">high</div><div class="value">[[formatCount(match.redMatchScore.autoBouldersHigh)]]</div><div class="value">[[formatCount(match.redMatchScore.teleopBouldersHigh)]]</div>
+                            </div>
+                          </div>
+                        </paper-material>
+                      </div>
+                    </div>
+                    <div>
+                      <div class="row">
+                        <paper-material>
+                          <div class="column">
+                            <h4>Blue Crossings</h4>
+                            <div class="row">
+                              <div class="position">1</div><div class="defense">low bar</div><div class="crossings">[[match.blueMatchScore.position1Crossings]]</div>
+                            </div>
+                            <div class="row">
+                              <div class="position">2</div><div class="defense">[[formatDefense(match.blueMatchScore.position2)]]</div><div class="crossings">[[match.blueMatchScore.position2Crossings]]</div>
+                            </div>
+                            <div class="row">
+                              <div class="position">3</div><div class="defense">[[formatDefense(match.blueMatchScore.position3)]]</div><div class="crossings">[[match.blueMatchScore.position3Crossings]]</div>
+                            </div>
+                            <div class="row">
+                              <div class="position">4</div><div class="defense">[[formatDefense(match.blueMatchScore.position4)]]</div><div class="crossings">[[match.blueMatchScore.position4Crossings]]</div>
+                            </div>
+                            <div class="row">
+                              <div class="position">5</div><div class="defense">[[formatDefense(match.blueMatchScore.position5)]]</div><div class="crossings">[[match.blueMatchScore.position5Crossings]]</div>
+                            </div>
+                          </div>
+                        </paper-material>
+                      </div>
+                      <div class="row">
+                        <paper-material>
+                          <div class="column">
+                            <h4>Blue Boulders</h4>
+                            <div class="row">
+                              <div class="label"></div><div class="value">auto</div><div class="value">teleop</div>
+                            </div>
+                            <div class="row">
+                              <div class="label">low</div><div class="value">[[formatCount(match.blueMatchScore.autoBouldersLow)]]</div><div class="value">[[formatCount(match.blueMatchScore.teleopBouldersLow)]]</div>
+                            </div>
+                            <div class="row">
+                              <div class="label">high</div><div class="value">[[formatCount(match.blueMatchScore.autoBouldersHigh)]]</div><div class="value">[[formatCount(match.blueMatchScore.teleopBouldersHigh)]]</div>
+                            </div>
+                          </div>
+                        </paper-material>
+                      </div>
+                    </div>
+                  </iron-pages>
+
+                </div>
+
+              </div>
+
+
+
+            </div>
+
+            <div class="card-actions"></div>
+          </paper-card>
+
+    <content></content>
+  </template>
+
+</dom-module>
+
+<script>
+
+  Polymer({
+
+    is: 'event-match-item',
+
+    properties: {
+
+      match: {
+        type: Object,
+        value: function(){
+          return null;
+        },
+        notify: true
+      }
+
+    },
+
+    // Element Lifecycle
+
+    ready: function() {
+      // `ready` is called after all elements have been configured, but
+      // propagates bottom-up. This element's children are ready, but parents
+      // are not.
+      //
+      // This is the point where you should make modifications to the DOM (when
+      // necessary), or kick off any processes the element wants to perform.
+    },
+
+    attached: function() {
+      // `attached` fires once the element and its parents have been inserted
+      // into a document.
+      //
+      // This is a good place to perform any work related to your element's
+      // visual state or active behavior (measuring sizes, beginning animations,
+      // loading resources, etc).
+    },
+
+    detached: function() {
+      // The analog to `attached`, `detached` fires when the element has been
+      // removed from a document.
+      //
+      // Use this to clean up anything you did in `attached`.
+    },
+
+    // Element Behavior
+
+    getEventCode: function(eventCodePath){
+      if(eventCodePath){
+        return eventCodePath.split("/")[1];
+      }
+      return "";
+    },
+
+    formatStartTime: function(startTime){
+      return startTime.replace(":00 ", " ").replace(", 2016", "");
+    },
+
+    formatCount: function(count){
+      if(count == 0){
+        return "--";
+      }else{
+        return count;
+      }
+    },
+
+    formatDefense: function(defense){
+      if(defense.toLowerCase() == "a_portcullis"){
+        return "porcullis";
+      }if(defense.toLowerCase() == "a_chevaldefrise"){
+        return "cheval";
+      }else if(defense.toLowerCase() == "b_ramparts"){
+        return "ramparts";
+      }else if(defense.toLowerCase() == "b_moat"){
+        return "moat";
+      }else if(defense.toLowerCase() == "c_drawbridge"){
+        return "drawbridge";
+      }else if(defense.toLowerCase() == "c_sallyport"){
+        return "sally port";
+      }else if(defense.toLowerCase() == "d_roughterrain"){
+        return "terrain";
+      }else if(defense.toLowerCase() == "d_rockwall"){
+        return "rock wall";
+      }else{
+        return "unknown";
+      }
+    },
+
+    onError: function(event){
+      this;
+    }
+
+  });
+
+</script>
